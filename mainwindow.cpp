@@ -161,7 +161,8 @@ void MainWindow::initVideoPlayers()
 {
     isCapturing1=false;isCapturing2=false;
     mPlayer1 = new VideoPlayer;
-//    mPlayer1->videoURL = urls[0];
+    urls.push_back("rtsp://admin:Lead123456@192.168.137.98:554/h265/ch1/main/av_stream");
+    mPlayer1->videoURL = urls[0];
     mPlayer2 = new VideoPlayer;
 //    mPlayer2->videoURL = urls[1];
     connectCamera();
@@ -648,8 +649,8 @@ void MainWindow::on_buttonStartCapture_clicked()
         isCapturing2=true;
         ui->buttonStartCapture->setText("StopCapture");
 
-//        mPlayer1->isCapturing1 = isCapturing1s[0];
-//        mPlayer1->startPlay();
+        mPlayer1->isCapturing = isCapturing1;
+        mPlayer1->startPlay();
 //        mPlayer2->isCapturing1 = isCapturing1s[1];
 //        mPlayer2->startPlay();
 
@@ -665,7 +666,7 @@ void MainWindow::on_buttonStartCapture_clicked()
 
         ui->buttonStartCapture->setText("StartCapture");
 
-//        mPlayer1->isCapturing1 = isCapturing1s[0];
+        mPlayer1->isCapturing = isCapturing1;
 //        mPlayer2->isCapturing1 = isCapturing1s[1];
 
 //        mNVR->isCapturing1=isCapturing1s[0];
@@ -803,7 +804,7 @@ void MainWindow::requestProcess(QImage img, int i)
 
 void MainWindow::slotGetOneFrame1(QImage img)
 {
-    ws[0]=img.width();hs[0]=img.height();
+//    ws[0]=img.width();hs[0]=img.height();
 //    if(mPlayer1->hasFinished)
 //    {
 //        isCapturing1s[0] = false;

@@ -33,10 +33,6 @@ void VideoPlayer::run()
     int streamIndex, i, numBytes;
     int ret, got_picture;
 
-/*    avformat_network_init();   ///初始化FFmpeg网络模块，2017.8.5---lizhen
-    av_register_all();  */       //初始化FFMPEG  调用了这个才能正常适用编码器和解码器
-
-
     //Allocate an AVFormatContext.
     pFormatCtx = avformat_alloc_context();
 
@@ -49,11 +45,11 @@ void VideoPlayer::run()
     char option_value2[]="100";
     av_dict_set(&avdic,option_key2,option_value2,0);
     ///rtsp地址，可根据实际情况修改
-//    char url[]="rtsp://admin:itv12345@192.168.1.64:554/h265/ch2/main/av_stream";
+//    char url[]="rtsp://admin:Lead123456@192.168.137.98:554/h265/ch1/main/av_stream";
     QByteArray qba = videoURL.toLocal8Bit();
-    char *url1=qba.data();
+    char *url=qba.data();
 
-    if (avformat_open_input(&pFormatCtx, url1, NULL, &avdic) != 0) {
+    if (avformat_open_input(&pFormatCtx, url, NULL, &avdic) != 0) {
         printf("can't open the file. \n");
         return;
     }
@@ -81,14 +77,14 @@ void VideoPlayer::run()
     }
 
     ///查找解码器
+    pAVctx = avcodec_alloc_context3(NULL);
     avcodec_parameters_to_context(pAVctx, pFormatCtx->streams[streamIndex]->codecpar);
-//    pAVctx = pFormatCtx->streams[streamIndex]->codec;
     pCodec = avcodec_find_decoder(pAVctx->codec_id);
     ///2017.8.9---lizhen
     pAVctx->bit_rate =0;   //初始化为0
     pAVctx->time_base.num=1;  //下面两行：一秒钟25帧
     pAVctx->time_base.den=12;
-    pAVctx->frame_number=1;  //每包一个视频帧
+//    pAVctx->frame_number=1;  //每包一个视频帧
 
     if (pCodec == NULL) {
         printf("Codec not found.\n");
@@ -113,16 +109,9 @@ void VideoPlayer::run()
             pAVctx->pix_fmt, pAVctx->width, pAVctx->height,
             AV_PIX_FMT_RGB32, SWS_BICUBIC, NULL, NULL, NULL);
 
-//    numBytes = avpicture_get_size(AV_PIX_FMT_RGB32, pAVctx->width,pAVctx->height);
-
-//    buf = (uint8_t *) av_malloc(numBytes * sizeof(uint8_t));
-//    avpicture_fill((AVPicture *) pAVframeRGB, buf, AV_PIX_FMT_RGB32,
-//            pAVctx->width, pAVctx->height);
-
-//    int y_size = pAVctx->width * pAVctx->height;
-
-//    packet = (AVPacket *) malloc(sizeof(AVPacket)); //分配一个packet
-//    av_new_packet(packet, y_size); //分配packet的数据
+    int y_size = pAVctx->width * pAVctx->height;
+    packet = (AVPacket *) malloc(sizeof(AVPacket)); //分配一个packet
+    av_new_packet(packet, y_size); //分配packet的数据
 
     hasFinished = false;
     while (1)
@@ -135,8 +124,6 @@ void VideoPlayer::run()
         }
 
         if (packet->stream_index == streamIndex) {
-//            ret = avcodec_decode_video2(pAVctx, pAVframe, &got_picture,packet);
-
             got_picture=avcodec_send_packet(pAVctx, packet);
             ret=avcodec_receive_frame(pAVctx, pAVframe);
 
@@ -144,7 +131,7 @@ void VideoPlayer::run()
                 printf("decode error.\n");
                 return;
             }
-            if (got_picture) {
+            if (!got_picture) {
                 sws_scale(img_convert_ctx,
                         (uint8_t const * const *) pAVframe->data,
                         pAVframe->linesize, 0, pAVctx->height, pAVframeRGB->data,
@@ -168,11 +155,8 @@ void VideoPlayer::run()
 //                emit sig_GetRFrame(image);
             }
         }
-//        av_free_packet(packet);
         av_packet_unref(packet);//释放资源,否则内存会一直上升
 
-//     ///2017.8.7---lizhen
-        msleep(100); //停一停  不然放的太快了
     }
     av_free(buf);
     av_free(pAVframeRGB);
