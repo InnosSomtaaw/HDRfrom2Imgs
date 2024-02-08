@@ -66,20 +66,18 @@ void PictureView::slotAdapte()
 
 void PictureView::on_pictureview_OpenImage()
 {
-    img_Name_input = QFileDialog::getOpenFileName(this,tr("Open Image"),".",
-                                                  tr("Image File(*.png *.jpg *.jpeg *.bmp)"));
-
-    emit outputImgProperty_request();
+    emit loadImgRequest();
 }
 
 void PictureView::on_pictureview_SaveImage()
 {
-    QString save_file = QFileDialog::getSaveFileName(this,tr("Save Image"),".",
-                                                     tr("Image File(*.png *.jpg *.jpeg *.bmp)"));
+    emit saveImgRequest();
+//    QString save_file = QFileDialog::getSaveFileName(this,tr("Save Image"),".",
+//                                                     tr("Image File(*.png *.jpg *.jpeg *.bmp)"));
 
-    if (save_file.isEmpty())
-        save_file = "test.png";
+//    if (save_file.isEmpty())
+//        save_file = "test.png";
 
-    QPixmap crnt_img = this->grab();
-    crnt_img.save(save_file);
+//    QPixmap crnt_img = this->grab();
+//    crnt_img.save(save_file);
 }

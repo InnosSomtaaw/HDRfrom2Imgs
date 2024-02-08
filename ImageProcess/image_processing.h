@@ -9,9 +9,13 @@
 #include <QFileDialog>
 #include <QImage>
 #include <qdatetime.h>
+#include <QRunnable>
 #include <QThread>
+#include <QThreadPool>
+#include <QElapsedTimer>
 
 #include <opencv2/opencv.hpp>
+#include <opencv2/core/ocl.hpp>
 
 #include "cv_stereomatcher.h"
 #include "imghdr.h"
@@ -27,8 +31,20 @@ enum WorkConditionsEnum
     HDRfrom1Img,
     HDRfrom1ImgGPU,
     ResizeShow,
+    ScheimpflugCalib
 };
 void QImage2Mat(QImage img, Mat& imgMat);
+
+class ImageWriter : public QRunnable
+{
+public:
+    //计时器
+    QElapsedTimer usrtimer;
+    QImage qimg;
+    //保存方式：0-png;1-bmp;2-jpg;
+    int method=0;
+    void run() override;
+};
 
 //图像处理类
 class Image_Processing_Class : public QObject
@@ -64,8 +80,8 @@ public:
     Mat img_input1,img_output1, img_input2, img_output2,img_output3;
     vector<Mat> img_inputs, img_outputs;
     vector<bool> inputFlags;
-    bool ai_ini_flg,cam1Refreshed,cam2Refreshed;
-    int save_count,max_save_count;
+    bool ai_ini_flg,hasInited,cam1Refreshed,cam2Refreshed,isDetecting,onGPU;
+    int save_count,max_save_count,onceRunTime;
     bool mainwindowIsNext,mainwindowIsStopProcess,isSavingImage;
 
     WorkConditionsEnum workCond;

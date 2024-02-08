@@ -4,12 +4,11 @@ Image_Processing_Class::Image_Processing_Class(QObject *parent)
 {
 //    img_input1,img_output1, img_input2, img_output2,img_output3 = NULL;
     initImgInOut();
-    ai_ini_flg=false;cam1Refreshed=false;cam2Refreshed = false;
+    ai_ini_flg=false;hasInited=false;cam1Refreshed=false;cam2Refreshed = false;isDetecting=false;onGPU=false;
     img_filenames = new QList<QFileInfo>();
-
-    save_count = 0,max_save_count =100;
-
+    save_count = 1,max_save_count =100,onceRunTime=0;
     mainwindowIsNext=false;mainwindowIsStopProcess=false;isSavingImage =false;
+    inputFlags.insert(inputFlags.begin(),4,false);
 
     plcSignals = new QQueue<_PLC_PARAMETER>();
     basePTs = new QQueue<Point>();
@@ -202,8 +201,8 @@ void Image_Processing_Class::resizeCompare()
     //测试线程：
     {
         img_output1 = img_input1.clone();
-        Laplacian(img_output1,img_output1,img_output1.depth());
-//        resize(img_output1,img_output1,Size(2000,470));
+//        Laplacian(img_output1,img_output1,img_output1.depth());
+        resize(img_output1,img_output1,Size(),0.5,0.5);
 
         ipcMutex.unlock();
 
@@ -375,4 +374,35 @@ bool Image_Processing_Class::processFilePic()
     {
         return false;
     }
+}
+
+void ImageWriter::run()
+{
+    usrtimer.start();
+
+    //按需保存图片：
+    QDateTime current_date_time =QDateTime::currentDateTime();
+    QString current_date =current_date_time.toString("yyyy_MM_dd");
+    QString current_time =current_date_time.toString("hh_mm_ss_zzz");
+    QString dir_str = "./SaveFile/"+current_date+"/";
+    QDir dir;
+    if (!dir.exists(dir_str))
+        dir.mkpath(dir_str);
+    QString fn;
+    switch (method) {
+    case 1:
+        fn=dir_str+current_time+"_mannulsaved.bmp";
+        break;
+    case 2:
+        fn=dir_str+current_time+"_mannulsaved.jpg";
+        break;
+    default:
+        fn=dir_str+current_time+"_mannulsaved.png";
+        break;
+    }
+
+    qimg.save(fn);
+    cout<<"Save time(width:"<<qimg.width()<<",height:"<<qimg.height()<<
+          "): "<<usrtimer.elapsed()<<" ms."<<endl;
+
 }
