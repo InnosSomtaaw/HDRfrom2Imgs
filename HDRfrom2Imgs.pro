@@ -17,6 +17,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     Camera/videoplayer.cpp \
+    ImageProcess/bincularstereo.cpp \
     ImageProcess/cv_stereomatcher.cpp \
     ImageProcess/image_processing.cpp \
     ImageProcess/imghdr.cpp \
@@ -27,6 +28,7 @@ SOURCES += \
 
 HEADERS += \
     Camera/videoplayer.h \
+    ImageProcess/bincularstereo.h \
     ImageProcess/cv_stereomatcher.h \
     ImageProcess/image_processing.h \
     ImageProcess/imghdr.h \

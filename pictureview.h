@@ -32,7 +32,8 @@ private:
     double mZoom;
 
 signals:
-    void outputImgProperty_request();
+    void loadImgRequest();
+    void saveImgRequest();
 
 private slots:
     void slotAdapte();
